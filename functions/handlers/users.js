@@ -209,7 +209,7 @@ exports.uploadImage = (req, res) => {
   let imageFileName;
   let imageToBeUploaded = {};
 
-  busboy.on('file', (fieldname, name, filename, encoding, mimetype) => {
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
       return res.status(400).json({ error: 'Wrong file type submitted' });
     }
@@ -224,7 +224,7 @@ exports.uploadImage = (req, res) => {
   busboy.on('finish', () => {
     admin
       .storage()
-      .bucket()
+      .bucket(config.storageBucket)
       .upload(imageToBeUploaded.filepath, {
         resumable: false,
         metadata: {
