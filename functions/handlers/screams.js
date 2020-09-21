@@ -1,5 +1,4 @@
 const { db } = require('../util/admin');
-const { json } = require('express');
 
 exports.getAllScreams = (req, res) => {
   db.collection('screams')
@@ -20,7 +19,10 @@ exports.getAllScreams = (req, res) => {
       });
       return res.json(screams);
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
+    });
 };
 
 exports.postOneScream = (req, res) => {
@@ -130,7 +132,7 @@ exports.likeScream = (req, res) => {
         screamData.screamId = doc.id;
         return likeDocument.get();
       } else {
-        return res.status(404), json({ error: 'Scream not found' });
+        return res.status(404).json({ error: 'Scream not found' });
       }
     })
     .then((data) => {
@@ -177,7 +179,7 @@ exports.unlikeScream = (req, res) => {
         screamData.screamId = doc.id;
         return likeDocument.get();
       } else {
-        return res.status(404), json({ error: 'Scream not found' });
+        return res.status(404).json({ error: 'Scream not found' });
       }
     })
     .then((data) => {

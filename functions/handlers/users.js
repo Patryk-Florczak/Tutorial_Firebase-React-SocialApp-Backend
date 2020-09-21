@@ -1,6 +1,7 @@
 const { admin, db } = require('../util/admin');
 
 const config = require('../util/config');
+const { uuid } = require('uuidv4');
 
 const firebase = require('firebase');
 firebase.initializeApp(config);
@@ -10,7 +11,6 @@ const {
   validateLoginData,
   reduceUserDetails,
 } = require('../util/validators');
-const { user } = require('firebase-functions/lib/providers/auth');
 
 // Sign user up
 exports.signup = (req, res) => {
@@ -208,6 +208,7 @@ exports.uploadImage = (req, res) => {
 
   let imageFileName;
   let imageToBeUploaded = {};
+  let generatedToken = uuid();
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
@@ -215,8 +216,8 @@ exports.uploadImage = (req, res) => {
     }
     const imageExtension = filename.split('.')[filename.split('.').length - 1];
     imageFileName = `${Math.round(
-      Math.random() * 100000000000
-    )}.${imageExtension}`;
+      Math.random() * 1000000000000
+    ).toString()}.${imageExtension}`;
     const filepath = path.join(os.tmpdir(), imageFileName);
     imageToBeUploaded = { filepath, mimetype };
     file.pipe(fs.createWriteStream(filepath));
@@ -230,11 +231,12 @@ exports.uploadImage = (req, res) => {
         metadata: {
           metadata: {
             contentType: imageToBeUploaded.mimetype,
+            firebaseStorageDownloadTokens: generatedToken,
           },
         },
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media&token=${generatedToken}`;
         return db.doc(`/users/${req.user.handle}`).update({ imageUrl });
       })
       .then(() => {
