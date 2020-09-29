@@ -4,7 +4,7 @@
 
 ## Live Demo
 
-In progress...
+To see the app in action, go [here](https://socialapp-51b1b.web.app/).
 
 ## Features
 
